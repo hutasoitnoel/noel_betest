@@ -18,8 +18,61 @@ const userDAO = new UserDAO({
 describe('userDAO test', () => {
     describe('findAll test', () => {
         it('should return a user', async () => {
-            const result = await userDAO.findAll()
-            expect(result).to.eql(mockUser)
+            const result = await userDAO.findAll({ page: 1, limit: 10 })
+            expect(result).to.eql({
+                data: mockUser,
+                totalDocuments: 10
+            })
+        })
+
+        it('should return a user', async () => {
+            const result = await userDAO.findAll({ page: 1, limit: 10 })
+            expect(result).to.eql({
+                data: mockUser,
+                totalDocuments: 10
+            })
+        })
+
+        it('should throw find() unexpected error', async () => {
+            const userDAOWithError = new UserDAO({
+                ...defaultParams,
+                UserModel: {
+                    find() {
+                        return {
+                            skip(num) {
+                                this.skipValue = num;
+                                return this;
+                            },
+                            limit(num) {
+                                this.limitValue = num;
+                                return Promise.reject(errorResponse);
+                            }
+                        };
+                    }
+                }
+            })
+
+            try {
+                await userDAOWithError.findAll({ page: 1, limit: 10 })
+            } catch (error) {
+                expect(error).to.eql(errorResponse)
+            }
+        })
+
+        it('should throw countDocuments() unexpected error', async () => {
+            const userDAOWithError = new UserDAO({
+                ...defaultParams,
+                UserModel: {
+                    ...mockUserModel,
+                    countDocuments: () => Promise.reject(errorResponse)
+                }
+            })
+
+            try {
+                await userDAOWithError.findAll({ page: 1, limit: 10 })
+            } catch (error) {
+                expect(error).to.eql(errorResponse)
+            }
         })
     })
 
@@ -252,7 +305,7 @@ describe('userDAO test', () => {
             }
         })
     })
-    
+
     describe('delete test', () => {
         it('should return user', async () => {
             const result = await userDAO.delete()
@@ -265,7 +318,7 @@ describe('userDAO test', () => {
             const userDAOWithNotFoundError = new UserDAO({
                 ...defaultParams,
                 UserModel: {
-                    findByIdAndDelete: () => {}
+                    findByIdAndDelete: () => { }
                 }
             })
 

@@ -16,25 +16,53 @@ const userServiceWithNoCache = new UserService({
     cache: {
         get: () => { },
         set: () => { },
-        del: () => { }
+        del: () => { },
+        keys: () => { }
     }
 })
 
 describe('userService test', () => {
     describe('findAll test', () => {
-        it('should return a user', async () => {
-            const result = await userService.findAll()
-            expect(result).to.eql(mockUser)
+        it('should return list from cache', async () => {
+            const result = await userService.findAll({})
+            expect(result).to.eql(mockUserCache)
+        })
+
+        it('should return list from dao', async () => {
+            const result = await userServiceWithNoCache.findAll({})
+            expect(result).to.eql({
+                currentPage: 1,
+                data: mockUser,
+                pageLimit: 10,
+                totalDocuments: 10,
+                totalPages: 1
+            })
+        })
+
+        it('should throw an error', async () => {
+            const userServiceWithError = new UserService({
+                ...defaultParams,
+                userDAO: {
+                    findAll: () => Promise.reject(errorResponse)
+                }
+            })
+
+            try {
+                await userServiceWithError.findAll({})
+            } catch (error) {
+                expect(error).to.eql(errorResponse)
+
+            }
         })
     })
 
     describe('findById test', () => {
-        it('should return cache data', async () => {
+        it('should return user from cache', async () => {
             const result = await userService.findById()
             expect(result).to.eql(mockUserCache)
         })
 
-        it('should return dao data', async () => {
+        it('should return user from dao', async () => {
             const result = await userServiceWithNoCache.findById()
             expect(result).to.eql(mockUser)
         })
@@ -56,12 +84,12 @@ describe('userService test', () => {
     })
 
     describe('findByAccountNumber test', () => {
-        it('should return cache data', async () => {
+        it('should return user from cache', async () => {
             const result = await userService.findByAccountNumber()
             expect(result).to.eql(mockUserCache)
         })
 
-        it('should return dao data', async () => {
+        it('should return user from dao', async () => {
             const result = await userServiceWithNoCache.findByAccountNumber()
             expect(result).to.eql(mockUser)
         })
@@ -83,12 +111,12 @@ describe('userService test', () => {
     })
 
     describe('findByIdentityNumber test', () => {
-        it('should return cache data', async () => {
+        it('should return user from cache', async () => {
             const result = await userService.findByIdentityNumber()
             expect(result).to.eql(mockUserCache)
         })
 
-        it('should return dao data', async () => {
+        it('should return user from dao', async () => {
             const result = await userServiceWithNoCache.findByIdentityNumber()
             expect(result).to.eql(mockUser)
         })
@@ -110,7 +138,7 @@ describe('userService test', () => {
     })
 
     describe('create test', () => {
-        it('should return user data', async () => {
+        it('should return user', async () => {
             const result = await userService.create()
             expect(result).to.eql(mockUser)
         })
@@ -132,7 +160,7 @@ describe('userService test', () => {
     })
 
     describe('update test', () => {
-        it('should return user data', async () => {
+        it('should return user', async () => {
             const result = await userService.update()
             expect(result).to.eql(mockUser)
         })
@@ -154,7 +182,7 @@ describe('userService test', () => {
     })
 
     describe('delete test', () => {
-        it('should return user data', async () => {
+        it('should return user', async () => {
             const id = 123
 
             const result = await userService.delete(id)
