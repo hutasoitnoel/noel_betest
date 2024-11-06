@@ -7,8 +7,16 @@ class UserService {
         this.cache = cache
     }
 
-    async findAll() {
-        return await this.userDAO.findAll()
+    async findAll({ page = 1, limit = 10 }) {
+        const { data, totalDocuments } = await this.userDAO.findAll({ page, limit })
+
+        return {
+            currentPage: Number(page),
+            pageLimit: Number(limit),
+            totalDocuments,
+            totalPages: Math.ceil(totalDocuments / limit),
+            data
+        };
     }
 
     async findById(userId) {

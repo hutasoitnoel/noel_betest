@@ -5,9 +5,21 @@ class UserDAO {
         this.model = UserModel
     }
 
-    async findAll() {
+    async findAll({ page, limit }) {
         try {
-            return await this.model.find()
+            const skip = (page - 1) * limit
+
+            const data = await this.model
+                .find()
+                .skip(skip)
+                .limit(limit)
+
+            const totalDocuments = await this.model.countDocuments()
+
+            return {
+                data,
+                totalDocuments
+            }
         } catch (error) {
             throw error
         }

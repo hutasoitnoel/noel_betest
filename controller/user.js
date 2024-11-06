@@ -19,7 +19,7 @@ module.exports = app => {
         cache: app.cache
     })
 
-    router.get('/', handleRequest(() => userService.findAll()))
+    router.get('/', handleRequest(req => userService.findAll(req.query)))
     router.get('/:id', handleRequest(req => userService.findById(req.params.id)))
     router.get('/account-number/:id', handleRequest(req => userService.findByAccountNumber(req.params.id)))
     router.get('/identity-number/:id', handleRequest(req => userService.findByIdentityNumber(req.params.id)))
