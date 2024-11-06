@@ -5,8 +5,11 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - PORT=3000
       - MONGODB_URI=mongodb://mongo:27017/db_noel_betest
       - REDIS_URI=redis://redis:6379
+      - JWT_SECRET=jenius_secret
+
     depends_on:
       - mongo
       - redis
